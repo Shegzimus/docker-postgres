@@ -3,3 +3,5 @@ services
 green_tripdata_2024-01.parquet
 for_hire_records_2024-01.parquet
 yellow_tripdata_2024-01.parquet
+taxi_zone_lookup.csv
+output.parquet
