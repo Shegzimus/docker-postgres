@@ -1,3 +1,4 @@
+# Postgres database
 docker run -d \
     -e POSTGRES_USER="root" \
     -e POSTGRES_PASSWORD="root" \
@@ -14,16 +15,19 @@ https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow
 ## Network
 docker network create pg-network
 
+
+## PgAdmin interface
 docker run -d \
     -e PGADMIN_DEFAULT_EMAIL=admin@admin.com \
     -e PGADMIN_DEFAULT_PASSWORD=root \
-    -p 8081:80 \
+    -p 8080:80 \
     --network=pg-network \
     dpage/pgadmin4
 
 URL="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
 
 
+## Ingest data into the database
 python ingest_data.py \
     --user=root \
     --password=root \
@@ -33,6 +37,7 @@ python ingest_data.py \
     --table_name=yellow_taxi_trips \
     --url=${URL}
 
+## Execute baked ingestion script via Dockerfile
 docker run -it \
     --network=pg-network \
     taxi_ingest:v001 \
@@ -43,3 +48,8 @@ docker run -it \
         --db=ny_taxi \
         --table_name=yellow_taxi_trips \
         --url=${URL}
+
+## Kestra test
+docker run --pull=always --rm -it -p 8080:8080 \
+    --user=root -v //./pipe/docker_engine:/var/run/docker.sock \
+    -v /tmp:/tmp kestra/kestra:latest server local
